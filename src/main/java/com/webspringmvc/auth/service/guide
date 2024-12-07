@@ -1,0 +1,2 @@
+Phần service này sẽ sử dụng những method có sẵn trong repository để tạo ra các method query tổng hợp or các method dịch vụ để 
+cung cấp cho controller.

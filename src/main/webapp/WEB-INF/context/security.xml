@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http:
+             xmlns:beans="http:
+             xmlns:xsi="http:
+             xsi:schemaLocation="http:
+            http:
+            http:
+            http:
+     
+     <!--  Đoạn code dưới là đang config cho security cho http  
+    +Không sử dụng cấu hình bảo mật mặc định (auto-config="false").
+   +Sử dụng biểu thức bảo mật để định nghĩa các quy tắc bảo mật (use-expressions="true"). 
+   +Tắt session-id trên url để bảo mật (disable-url-rewriting="true").      -->
+    <http auto-config="false" use-expressions="true" disable-url-rewriting="true">
+    	
+    	<!-- <! Chặn all và chỉ người dùng có vai trò 'ADMIN' mới được phép truy cập URL này.
+    	Cấu hình này sẽ lấy UserDetails trong systems để lấy role code -->
+    	<intercept-url pattern="/quan-tri/trang-chu" access="hasAnyRole('ADMIN')" />
+    	
+    	<!-- Cấu hình này dùng để xử lý khi User ko có vai trò(VD admin) thì sẽ truy cập vào url này đại diện cho 1 method ở controller(TỨc là dùng để handler khi ko 
+    	có quyền)  -->
+    	<access-denied-handler error-page="/accessDenied" />
+        <!-- <! 1 
+        <form-login><!  là thẻ cấu hình login dựa vào url /dang-nhap
+        (Tức là trang nào có url /dang-nhap thì là đang cấu hình cho  cho trang đó)  -->
+        <form-login  login-page="/dang-nhap"
+                     username-parameter="j_username"
+                     password-parameter="j_password"
+                     login-processing-url="/j_spring_security_check"
+                     authentication-success-handler-ref="customSuccessHandler"
+                     authentication-failure-url="/dang-nhap?incorrectAccount"/>
+         <!-- <! 2
+         1->2: Khi user access vào page có url /dang-nhap và nhập tk, mk thì 
+          tk, mk sẽ đc gửi vào tham số j_username và j_password rồi gửi đến 
+          url /j_spring_security_check và url này đại diện cho 1 method trong plugin lib security và trong method có gọi method của bean customUserDetailsService(xác thực,encode mk + lưu info user thay session).
+          Nếu xác thực success thì customSuccessHandler(là method handle mk, tk đúng) sẽ xử lý khi mk, tk đúng và chuyển hướng user đến trang-chủ, trang muốn truy cập banđầu.
+          Nếu xác thực failure thì chuyển hướng(tức là client gửi yêu cầu đến url /dang-nhap?incorrectAccount 
+          và server respone lại page có url đó đại diện) page login và thông báo lỗi
+        
+Đây là CONFIG PHIÊN LÀM VIỆC        
+Nếu phiên của người dùng (hết hạn hoặc bị hủy), họ sẽ được chuyển hướng đến /dang-nhap?sessionTimeout để đăng nhập lại.          -->
+         <session-management > 
+       <!--     NẾu để   <session-management invalid-session-url="/dang-nhap?sessionTimeout"</session-management><!  thì khi logout nó ko về trang-chu mà về trong login> 
+            Giới hạn số lượng phiên cho mỗi người dùng  -->
+            <concurrency-control max-sessions="10" error-if-maximum-exceeded="true" />           
+        </session-management>
+ <!--  <! khi user truy cập url /logout thì sẽ xoá session id  trong cookie trên brower và đồng thời hủy phiên trong hệ thống  
+  Config này hoạt động khi cấu hình security = code+annotation.Khi cấu hình url /logout là url default cho việc logout thì cấu hình này mới hoạt động         
+    Còn dùng method SecurityContextLogoutHandler().logout(..); là xóa chay và chỉ xóa trong hệ thống chứ ko xóa đc trên trình duyệt  
+    NÊn dùng cả 2   -->
+       <logout logout-success-url="/accessDenied" delete-cookies="JSESSIONID"/>   		
+   <!--  <!   Bật Cấu hình bảo vệ CSRF  
+       <!  <csrf />  -->
+    </http>
+    
+<!-- <! Cấu hình quản lý xác thực  5.  -->
+     <authentication-manager >
+     	<!-- <! Là (bean) chứa method dịch vụ xác thực user  -->
+        <authentication-provider user-service-ref="customUserDetailsService">
+        		<!-- <! Khi signup thì mk đc mã hóa và lưu xuồng database, Còn khi login thì encode để so sánh vs mk đã encode ở csdl(Mặc dù encode ko same)
+        		ref là tham chiếu tới 1 class  -->
+        		<password-encoder ref="bcryptEncoder"/>
+        </authentication-provider>
+    </authentication-manager>
+    
+  <!--  <!  Gọi bean cho các phần cấu hình trên sử dụng  -->
+     <beans:bean id="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+     <beans:bean id="customUserDetailsService" class="com.webspringmvc.auth.security.CustomUserDetailsService" />
+     <beans:bean id="customSuccessHandler" class="com.webspringmvc.auth.security.CustomSuccessHandler" />
+</beans:beans>
+
+<!-- <! 
+===>file này dùng để định nghĩa cách mà các yêu cầu HTTP sẽ được bảo mật
+
+CÁCH HOẠT ĐỘNG CỦA FILE NÀY VÀ FORM LOGIN.JSP
+
+
+1. **Đầu tiên Khi Người dùng truy cập vào URL `/dang-nhap`:**
+  	-Thì file security.xml sẽ cấu hình all các cấu hình trong thẻ <form-login> cho all các component trong url /dang-nhap.
+
+2. **Sau đó Hiển thị trang đăng nhập:**
+   - Người dùng thấy form đăng nhập với các trường để nhập tên đăng nhập (username) và mật khẩu (password). Form này có thể được 
+   định nghĩa trong một tệp JSP, HTML, hoặc một tệp khác.
+
+3. **Người dùng nhập thông tin đăng nhập:**
+   - Người dùng nhập tên đăng nhập và mật khẩu vào form.
+   - Form đăng nhập được định nghĩa để gửi thông tin đến URL `/j_spring_security_check`.
+
+4. **Gửi thông tin đăng nhập:**
+   - Khi người dùng nhấn nút "Đăng nhập", form gửi một yêu cầu POST(dùng Post để bảo mật mk, tk) tới URL `/j_spring_security_check` 
+   với các tham số `j_username` và `j_password`
+
+5.
+- Và url này đại diện cho 1 method UsernamePasswordAuthenticationFilter ở lib springsecurity đc plugin ở pom
+-UsernamePasswordAuthenticationFilter lấy info nhập vào (tk,mk) và  tạo ra đối tượng UsernamePasswordAuthenticationToken.
+-UsernamePasswordAuthenticationToken được chuyển đến AuthenticationManager.
+-AuthenticationManager sử dụng một hoặc nhiều AuthenticationProvider để xác thực 
+-Rồi AuthenticationProvider sử dụng bean của 2class customUserDetailsService và bcryptEncoder có các method(of customUserDetailsService) Ktra tk Và
+ method(of bcryptEncoder) encode rồi Ktra mk rồi đồng thời  gọi method của bean customUserDetailsService(xác thực,encode mk + lưu info user thay session).
+6. **Kết quả xác thực:**
+   -Nếu đúng mk, tk thì UsernamePasswordAuthenticationFilter sẽ gọi AuthenticationSuccessHandler(là superclass tham chiếu đến customSuccessHandler)
+   và concreate của class này(bean) sẽ gọi method handle or onAuthenticationSuccess  để trả về url phù hợp và redirect đến page đó.
+   - **Thành công:** Nếu tên đăng nhập và mật khẩu đúng, `customSuccessHandler` sẽ xử lý thành công xác thực và chuyển hướng người dùng đến trang đích 
+   (thường là trang chủ hoặc trang mà người dùng muốn truy cập ban đầu).
+   - **Thất bại:** Nếu tên đăng nhập và mật khẩu không đúng, người dùng sẽ được chuyển hướng trở lại trang đăng nhập với URL `/dang-nhap?incorrectAccount`.
+ -->

@@ -1,0 +1,47 @@
+<beans xmlns="http:
+
+   xmlns:context="http:
+
+   xmlns:xsi="http:
+
+   xmlns:mvc="http:
+
+   xsi:schemaLocation="
+
+        http:
+
+        http:
+
+        http:
+
+        http:
+
+        http:
+
+              http:
+<!--===>dispatcher-servlet.xml: Tệp cấu hình dành riêng cho lớp web trong Spring MVC, tập trung vào
+ các controller, view resolver, và xử lý yêu cầu HTTP. -->
+ 
+ 
+<!--Cấu hình này dùng để chỉ định các gói mà spring sẽ scan và  Spring tự động phát hiện các lớp được đánh dấu bằng các chú thích như @Component, @Service, @Repository, @Controller, và đăng ký chúng làm bean(object của class) trong ApplicationContext(là 1 bean container). -->
+<!--Giới hạn chỉ quét ở gói cụ thể controller --> 
+<!--Cái này chỉ quét controller vì nó dùng để điều phối url(dispatcher) trong request của người dùng vào đúng vs method đại diện cho url -->
+   <context:component-scan
+      base-package="com.webspringmvc.controller, com.webspringmvc.auth.controller" />
+      
+      
+<!--Dùng để kích hoạt annotaion giúp Spring MVC tự động phát hiện các controller dựa trên chú thích @Controller,, @RequestMapping, @GetMapping,...
+ và định tuyến các yêu cầu tới các controller phù hợp.  -->
+   <mvc:annotation-driven />
+<!-- Cấu hình View Resolver -->
+   <bean
+      class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	 <!--Đoạn này đc hiểu là all url trong dir /WEB-INF/views/ sẽ đc gắn với đầu là /WEB-INF/views/-->
+      <property name="prefix" value="/WEB-INF/views/" />
+	 <!--Và kết thúc = .jsp để các class hiểu đc đó là path of page nào -->
+      <property name="suffix" value=".jsp" />
+
+   </bean>
+   <!--Mapping tất cả các link bắt đầu = /template** vào trong file admin và home của dir decorator -->
+   <mvc:resources mapping="/template/**" location="/template/" />
+</beans>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ===>Tóm lại đây chỉ là file cấu hình các template để filter lọc các template trong dir decorators -->
+
+<decorators defaultdir="/decorators"> <!-- là dir decorators of dir webapp chứa các css  -->
+	<!-- Any urls that are excluded will never be decorated by Sitemesh -->
+	
+	<excludes><!-- excludes là những template bị loại bỏ khỏi sitemesh-->
+		<pattern>/api*</pattern>
+	</excludes>
+	<!-- apply Sitemesh default template -->
+<!-- ACTIVITY:Khi có 1 request vào filter chains và bộ lọc sitemesh decorator nằm trong filter chains. Request phải đi
+qua all filter và khi đi qua filter này thì url(/*, /quan-tri*, /dang-nhap, /dang-ky) cùng request nào sẽ 
+tương ứng với template decorator(là các file jsp trong dir decorators) của url đó.Và các trang có url cùng request muốn
+đại diện chính là <dec:body/> đc decor bởi các file jsp của dir decorators.
+===>Response cũng sẽ hoạt động tương tự
+===>Kể cả những trang ko có header, footer như login, register vẫn phải cấu hình filter vì phải decor cả link css, js,..-->
+	<decorator name="web" page="web.jsp"><!-- VỚi những page có url đại diện còn lại sẽ đc decor = file web.jsp trong dir  decorators-->
+       <pattern>/*</pattern>
+    </decorator>
+    
+    <decorator name="admin" page="admin.jsp">
+       <pattern>/quan-tri*</pattern>
+    </decorator>
+    
+    <decorator name="login" page="login.jsp">
+       <pattern>/dang-nhap</pattern>
+    </decorator>
+   <decorator name="login" page="login.jsp">
+       <pattern>/dang-ky</pattern>
+    </decorator>
+</decorators>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http:
+
+       xmlns:xsi="http:
+
+       xmlns:context="http:
+
+       xsi:schemaLocation="http:
+
+       http:
+
+    http:
+
+    http:
+<!--==>applicationContext.xml: Tệp cấu hình chính cho toàn bộ ứng dụng Spring, bao gồm các dịch vụ, repository, cấu hình cơ sở dữ liệu,
+ và các thành phần không liên quan trực tiếp đến web. -->
+ 
+ 	
+	<!--scan all các gói trong web và đăng ký chúng làm bean cho vào bean container trong ApplicationContext -->
+    <!--quét bean cho @Autowired -->
+    <context:component-scan base-package="com.webspringmvc" />
+	
+</beans>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http:
+    <persistence-unit name="persistence-data">
+<!--file cấu Entity chỉ định một đối tượng persistence-data với một class entity được quản lý bởi JPA.
+cho phép ứng dụng Java tương tác csdl thông qua Entity
+ -->
+        <class>com.webspringmvc.entity.NewsEntity</class>
+        <class>com.webspringmvc.auth.entity.UserEntity</class>
+        <class>com.webspringmvc.auth.entity.RoleEntity</class>
+        
+    </persistence-unit>
+</persistence>
+
+<!--XML Đây là Persisten trong JPA diagram -->
